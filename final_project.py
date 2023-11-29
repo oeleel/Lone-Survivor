@@ -131,6 +131,12 @@ def chase(): #makes enemy follow player
         if player.y < enem.y:
             enem.y += -ty
 
+        for q in enemies: #enemies cant overlap
+            for w in enemies:
+                if q != w:
+                    q.move_to_stop_overlapping(w)
+
+
         '''if player.x > enem.x and not flipped:      NOT WORKING NEED TO FIX, trying to make it so that enemy always faces player
             enem.flip()
             flipped = True
@@ -140,7 +146,6 @@ def chase(): #makes enemy follow player
             enem.flip()
             flipped = False
 '''
-
 
 
 
