@@ -1,0 +1,8 @@
+Leo Lee - pfw5ty
+Justin Lee - fesd3x
+
+So far, we have implemented the sprite animation for the main character,
+player movement using mouse clicks, randomized enemy spawning, and enemy collision
+detection. Moving forward, we need to complete the abilities for the player and
+its projectiles, the power ups, and the points system, as well as improve the overall
+look of our game.

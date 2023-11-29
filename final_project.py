@@ -131,19 +131,6 @@ def chase(): #makes enemy follow player
         if player.y < enem.y:
             enem.y += -ty
 
-        '''if player.x > enem.x and not flipped:      NOT WORKING NEED TO FIX, trying to make it so that enemy always faces player
-            enem.flip()
-            flipped = True
-
-
-        if player.x < enem.x and flipped:
-            enem.flip()
-            flipped = False
-'''
-
-
-
-
 
 def tick():
     camera.clear('black')
