@@ -132,6 +132,12 @@ def chase(): #makes enemy follow player
             enem.y += -ty
 
 
+        for q in enemies: #enemies cant overlap
+            for w in enemies:
+                if q != w:
+                    q.move_to_stop_overlapping(w)
+
+
 def tick():
     camera.clear('black')
     camera.draw(player)
