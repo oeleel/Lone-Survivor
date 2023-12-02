@@ -134,6 +134,7 @@ def chase(): #makes enemy follow player
         if player.y < enem.y:
             enem.y += -ty
 
+
         for q in enemies: #enemies cant overlap
             for w in enemies:
                 if q != w:
@@ -163,6 +164,7 @@ def ult():
             enemies.pop(w)
         ult_range.x = -400
         ult_range.y = -500
+
 
 
 def tick():
