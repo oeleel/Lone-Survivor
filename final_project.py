@@ -8,6 +8,9 @@ player_images = uvage.load_sprite_sheet('sprite_sheet_cs1110.png', 4, 4)
 player = uvage.from_image(200,200, player_images[0])
 point = uvage.from_circle(400, 300, 'red', 5) #used to show mouseclick on screen
 
+ult_orb = uvage.from_circle(400, 400, 'blue', 20)
+ult_range = uvage.from_circle(-400, -500, 'blue', 200)
+
 y_down_increment = 0 #goes to 3
 x_left_increment = 4 #goes to 7
 x_right_increment = 8 #goes to 11
@@ -147,13 +150,30 @@ def chase(): #makes enemy follow player
             flipped = False
 '''
 
+def ult():
+    if player.touches(ult_orb):
 
+        touch = [] #must create list bc pop makes list shorter
+        ult_range.x = ult_orb.x
+        ult_range.y = ult_orb.y
+        for q in range(len(enemies), ):
+            if ult_range.touches(enemies[q]):
+                touch.append(q)
+        for w in touch[::-1]:
+            enemies.pop(w)
+        ult_range.x = -400
+        ult_range.y = -500
 
 
 def tick():
     camera.clear('black')
     camera.draw(player)
     camera.draw(point)
+
+    camera.draw(ult_orb)
+    camera.draw(ult_range)
+    ult()
+
     player_move()
     spawn_enemy()
     chase()
