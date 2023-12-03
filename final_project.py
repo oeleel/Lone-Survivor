@@ -236,8 +236,8 @@ def fireball():
     # If the ability is active, update its position
     if q_ability_out:
         # Move q_ability in the calculated direction at a fixed speed (e.g., 7)
-        q_ability.x += q_ability_dx * 10
-        q_ability.y += q_ability_dy * 10
+        q_ability.x += q_ability_dx * 12
+        q_ability.y += q_ability_dy * 12
 
         # Check if q_ability is off the screen
         if q_ability.x > camera.width or q_ability.x < 0 or q_ability.y > camera.height or q_ability.y < 0:
