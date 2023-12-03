@@ -10,7 +10,8 @@ player_images = uvage.load_sprite_sheet('sprite_sheet_cs1110.png', 4, 4)
 player = uvage.from_image(200,200, player_images[0])
 point = uvage.from_circle(400, 300, 'red', 5) #used to show mouseclick on screen
 score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
-
+ult_ready = uvage.from_text(87,60, 'R: Ready', 50, 'red')
+ult_not_ready = uvage.from_text(120,60, 'R: Not Ready', 50, 'red')
 q_ability = uvage.from_image(-1000, -1000, 'qAbility.png')
 q_ability.scale_by(0.05)
 ability_off_loc = uvage.from_circle(-1000, -1000, 'red', 1)
@@ -190,25 +191,11 @@ def grab_ult():
         ult_orb.y = -100
 
 
-def spawn_ult():
-    global frames, has_ult
-    if has_ult == False:
-        if frames == 240:
-            ult_orb.x = random.randint(100, 700)
-            ult_orb.y = random.randint(100, 500)
-            frames = 0
-        else:
-            frames += 1
 
-def grab_ult():
-    global has_ult
-    if player.touches(ult_orb):
-        has_ult = True
-        ult_orb.x = -100
-        ult_orb.y = -100
+
 
 def use_ult():
-    global has_ult
+    global has_ult,score, score_display
     if uvage.is_pressing("r") and has_ult == True:
         has_ult = False
         touch = [] #must create list bc pop makes list shorter
@@ -219,6 +206,8 @@ def use_ult():
                 touch.append(q)
         for w in touch[::-1]:
             enemies.pop(w)
+        score += len(touch)
+        score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
         ult_range.x = -400
         ult_range.y = -500
 
@@ -263,22 +252,37 @@ def fireball():
             q_ability_out = False
             position_captured = False
 
+#def enemy_kill():
+    #global score, score_display
+    #enemy_touched = False
+    #for enemy in enemies:
+        #if q_ability.touches(enemy) and not enemy_touched:
+            #enemy.x = 1000
+            #enemy.y = 1000
+            #q_ability.x = ability_off_loc.x
+            #q_ability.y = ability_off_loc.y
+            #score += 1
+            #score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
+            #enemy_touched = True
 def enemy_kill():
     global score, score_display
-    enemy_touched = False
-    for enemy in enemies:
-        if q_ability.touches(enemy) and not enemy_touched:
-            enemy.x = 1000
-            enemy.y = 1000
+    touch = []
+    for q in range(len(enemies), ):
+        if q_ability.touches(enemies[q]):
+            touch.append(q)
             q_ability.x = ability_off_loc.x
             q_ability.y = ability_off_loc.y
             score += 1
             score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
-            enemy_touched = True
+    for w in touch[::-1]:
+        enemies.pop(w)
+
+
+
 
 
 def tick():
-    global score_display, score
+    global score_display, score, has_ult
 
     camera.clear('black')
 
@@ -302,6 +306,11 @@ def tick():
     fireball()
     chase()
     camera.draw(score_display)
+
+    if has_ult:
+        camera.draw(ult_ready)
+    else:
+        camera.draw(ult_not_ready)
 
 
 
