@@ -40,6 +40,8 @@ y_up_increment = 12 #goes to 15
 last_x_direction = 'right'
 last_y_direction = 'down'
 
+screen = 0
+
 enemies = []
 
 
@@ -282,41 +284,48 @@ def enemy_kill():
 
 
 def tick():
-    global score_display, score, has_ult
+    global score_display, score, has_ult, screen
 
-    camera.clear('black')
+    if screen == 0:
+        camera.clear('black')
+        camera.draw(uvage.from_text(400, 100, 'Final Project Game', 70, 'white', True))
+        camera.draw(uvage.from_color(400, 400, 'white', 120, 70))
+        camera.draw(uvage.from_text(400, 400, 'Play', 70, 'black', True))
+        if camera.mouseclick:
+            point.center = camera.mouse
+        if point.x > 340 and point.x < 460 and point.y > 365 and point.y < 435:
+            screen = 1
 
-    score_display.text = 'Score: ' + str(score)
+        camera.display()
+    if screen == 1:
+        camera.clear('black')
+        score_display.text = 'Score: ' + str(score)
 
-    camera.draw(player)
-    camera.draw(point)
+        camera.draw(player)
+        camera.draw(point)
 
-    camera.draw(ult_orb)
-    camera.draw(ult_range)
-    spawn_ult()
-    grab_ult()
-    use_ult()
+        camera.draw(ult_orb)
+        camera.draw(ult_range)
+        spawn_ult()
+        grab_ult()
+        use_ult()
 
-    camera.draw(q_ability)
+        camera.draw(q_ability)
+        player_move()
+        spawn_enemy()
+        enemy_kill()
+        fireball()
+        chase()
+        camera.draw(score_display)
 
+        if has_ult:
+            camera.draw(ult_ready)
+        else:
+            camera.draw(ult_not_ready)
 
-    player_move()
-    spawn_enemy()
-    enemy_kill()
-    fireball()
-    chase()
-    camera.draw(score_display)
-
-    if has_ult:
-        camera.draw(ult_ready)
-    else:
-        camera.draw(ult_not_ready)
-
-
-
-    for i in enemies:
-        camera.draw(i)
-    camera.display()
+        for i in enemies:
+            camera.draw(i)
+        camera.display()
 
 
 uvage.timer_loop(60, tick)
