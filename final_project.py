@@ -303,6 +303,8 @@ def tick():
     chase()
     camera.draw(score_display)
 
+
+
     for i in enemies:
         camera.draw(i)
     camera.display()
