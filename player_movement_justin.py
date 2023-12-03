@@ -27,7 +27,6 @@ def move_mc():
         mc.x += tx
     if point.x < mc.x:
         mc.x += -tx
-
     if point.y > mc.y:
         mc.y += ty
     if point.y < mc.y:

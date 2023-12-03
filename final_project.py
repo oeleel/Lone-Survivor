@@ -7,6 +7,8 @@ camera = uvage.Camera(800, 600)
 player_images = uvage.load_sprite_sheet('sprite_sheet_cs1110.png', 4, 4)
 player = uvage.from_image(200,200, player_images[0])
 point = uvage.from_circle(400, 300, 'red', 5) #used to show mouseclick on screen
+q_ability = uvage.from_image(240, player.y, 'qAbility.png')
+q_ability.scale_by(0.05)
 
 ult_orb = uvage.from_circle(400, 400, 'blue', 20)
 ult_range = uvage.from_circle(-400, -500, 'blue', 200)
@@ -47,6 +49,8 @@ def player_move():
 
     player.x += tx
     player.y += ty
+    q_ability.x += tx
+    q_ability.y += ty
 
     is_moving = hypo > 1  # Check if the player is far enough
     idle_bound = 4
@@ -151,8 +155,34 @@ def chase(): #makes enemy follow player
             flipped = False
 '''
 
+
 def ult():
-    if player.touches(ult_orb):
+    #if player.touches(ult_orb):
+
+#def fireball():
+    q_ability = uvage.from_image(player.left, player.y, 'qAbility.png')
+    '''if uvage.is_pressing('q'):
+        y_abs = abs(q_ability.y - mousey)
+        x_abs = abs(q_ability.x - mousex)
+        y_dist = q_ability.y - mousey
+        x_dist = q_ability.x - mousex
+
+        hypo1 = math.sqrt(y_dist ** 2 + x_dist ** 2)
+        speed = 7
+
+        if hypo1 != 0:
+            tx = (x_dist / hypo1) * speed
+            ty = (y_dist / hypo1) * speed
+        else:
+            tx = 0
+            ty = 0
+
+        player.x += tx
+        player.y += ty
+        q_ability.x += tx
+        q_ability.y += ty
+
+
 
         touch = [] #must create list bc pop makes list shorter
         ult_range.x = ult_orb.x
@@ -164,6 +194,7 @@ def ult():
             enemies.pop(w)
         ult_range.x = -400
         ult_range.y = -500
+        '''
 
 
 
@@ -172,12 +203,16 @@ def tick():
     camera.draw(player)
     camera.draw(point)
 
-    camera.draw(ult_orb)
-    camera.draw(ult_range)
+
+    #camera.draw(ult_orb)
+    #camera.draw(ult_range)
     ult()
+
+    camera.draw(q_ability)
 
     player_move()
     spawn_enemy()
+    #fireball()
     chase()
     for i in enemies:
         camera.draw(i)
