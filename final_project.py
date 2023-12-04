@@ -4,27 +4,28 @@ import random
 
 camera = uvage.Camera(800, 600)
 
+background = uvage.from_image(400,300, 'cs1110_game_background.png')
+background.scale_by(4)
+
 score = 0
 
 player_images = uvage.load_sprite_sheet('sprite_sheet_cs1110.png', 4, 4)
 player = uvage.from_image(200,200, player_images[0])
-point = uvage.from_circle(400, 300, 'red', 5) #used to show mouseclick on screen
-score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
+point = uvage.from_circle(400, 300, 'red', 0.01) #for direction of player movement
+
+score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red') #score display variables
 ult_ready = uvage.from_text(87,60, 'R: Ready', 50, 'red')
 ult_not_ready = uvage.from_text(120,60, 'R: Not Ready', 50, 'red')
-q_ability = uvage.from_image(-1000, -1000, 'qAbility.png')
+
+q_ability = uvage.from_image(-1000, -1000, 'qAbility.png') #q-ability variables
 q_ability.scale_by(0.05)
 ability_off_loc = uvage.from_circle(-1000, -1000, 'red', 1)
-q_og_x = -1000
-q_og_y = -1000
 q_ability_out = False
 q_key_was_pressed = False
 
-ult_orb = uvage.from_circle(-100, -100, 'blue', 20)
+ult_orb = uvage.from_image(-100, -100, 'ultimate_ability.png') #ultimate orb variables
+ult_orb.scale_by(0.2)
 ult_range = uvage.from_circle(-400, -500, 'blue', 200)
-has_ult = False
-frames = 0
-
 has_ult = False
 frames = 0
 
@@ -41,7 +42,7 @@ last_x_direction = 'right'
 last_y_direction = 'down'
 
 screen = 0
-
+frames_enemy_spawn = 0
 enemies = []
 
 
@@ -60,7 +61,7 @@ def player_move():
     x_dist = point.x - player.x
 
     hypo = math.sqrt(y_dist**2 + x_dist**2)
-    speed = 7
+    speed = 5
 
     if hypo != 0:
         tx = (x_dist / hypo) * speed
@@ -117,13 +118,17 @@ def player_move():
             player.image = player_images[4]
 
 def spawn_enemy():
-    spawn_rate = random.randint(1, 90)
-    if spawn_rate < 3: #spawn one about every 3 seconds DOES NOT SPAWN EVER 3 SEOCNDS
+    global score, frames_enemy_spawn
+    base_spawn_rate = 60
+    score_factor = score // 10
+    spawn_rate = base_spawn_rate - (score_factor * 5)
+
+    if frames_enemy_spawn % spawn_rate == 0:
         enemy = uvage.from_image(-40, -40, 'enemy.png')
         enemy.scale_by(0.1)
         xcoord = random.randint(-40, 840)
         ycoord = random.randint(-40, 640)
-        side = random.randint(1, 4) #determines which side of the screen enemy spawns from
+        side = random.randint(1, 4)
         if side == 1: #spawn from north
             enemy.x = xcoord
             enemy.y = -40
@@ -137,9 +142,10 @@ def spawn_enemy():
             enemy.x = -40
             enemy.y = ycoord
         enemies.append(enemy)
+    frames_enemy_spawn += 1
+
 
 def chase(): #makes enemy follow player
-    global flipped
     for enem in enemies:
         ydist = abs(enem.y - player.y)
         xdist = abs(enem.x - player.x)
@@ -162,19 +168,6 @@ def chase(): #makes enemy follow player
         if player.y < enem.y:
             enem.y += -ty
 
-
-
-
-
-        '''if player.x > enem.x and not flipped:      NOT WORKING NEED TO FIX, trying to make it so that enemy always faces player
-            enem.flip()
-            flipped = True
-
-
-        if player.x < enem.x and flipped:
-            enem.flip()
-            flipped = False
-'''
 def spawn_ult():
     global frames, has_ult
     if has_ult == False:
@@ -193,9 +186,6 @@ def grab_ult():
         ult_orb.y = -100
 
 
-
-
-
 def use_ult():
     global has_ult,score, score_display
     if uvage.is_pressing("r") and has_ult == True:
@@ -203,104 +193,92 @@ def use_ult():
         touch = [] #must create list bc pop makes list shorter
         ult_range.x = player.x
         ult_range.y = player.y
-        for q in range(len(enemies), ):
+        for q in range(len(enemies)):
             if ult_range.touches(enemies[q]):
                 touch.append(q)
         for w in touch[::-1]:
             enemies.pop(w)
         score += len(touch)
-        score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
+        score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
         ult_range.x = -400
         ult_range.y = -500
 
 def fireball():
     global q_ability_out, q_ability_dx, q_ability_dy, current_x, current_y, position_captured, q_og_x, q_og_y
 
-    # Check if positions are stored and the ability is not already active
     if uvage.is_pressing('q') and not q_ability_out:
         if not position_captured:
             q_ability.x = player.x
             q_ability.y = player.y
 
-            # Capture and store the mouse's position at the moment 'q' is pressed
             stored_mouse_x = camera.mousex
             stored_mouse_y = camera.mousey
             position_captured = True
 
-            # Calculate the direction from q_ability's current position to the stored mouse position
             q_ability_dx = stored_mouse_x - player.x
             q_ability_dy = stored_mouse_y - player.y
 
-            # Normalize the direction
+
             distance = math.sqrt(q_ability_dx ** 2 + q_ability_dy ** 2)
             if distance != 0:
                 q_ability_dx /= distance
                 q_ability_dy /= distance
 
-            # Activate the ability
             q_ability_out = True
 
-    # If the ability is active, update its position
     if q_ability_out:
-        # Move q_ability in the calculated direction at a fixed speed (e.g., 7)
         q_ability.x += q_ability_dx * 12
         q_ability.y += q_ability_dy * 12
 
-        # Check if q_ability is off the screen
         if q_ability.x > camera.width or q_ability.x < 0 or q_ability.y > camera.height or q_ability.y < 0:
-            # Reset q_ability's position to the current player's position and deactivate it
             q_ability.x = ability_off_loc.x
             q_ability.y = ability_off_loc.y
             q_ability_out = False
             position_captured = False
 
-#def enemy_kill():
-    #global score, score_display
-    #enemy_touched = False
-    #for enemy in enemies:
-        #if q_ability.touches(enemy) and not enemy_touched:
-            #enemy.x = 1000
-            #enemy.y = 1000
-            #q_ability.x = ability_off_loc.x
-            #q_ability.y = ability_off_loc.y
-            #score += 1
-            #score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
-            #enemy_touched = True
 def enemy_kill():
     global score, score_display
     touch = []
-    for q in range(len(enemies), ):
-        if q_ability.touches(enemies[q]):
+    for q in range(len(enemies)):
+        if q_ability.touches(enemies[q], 5, 5):
             touch.append(q)
             q_ability.x = ability_off_loc.x
             q_ability.y = ability_off_loc.y
             score += 1
-            score_display = uvage.from_text(80, 30, 'Score: ' + str(score), 50, 'red')
+            score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
+
     for w in touch[::-1]:
         enemies.pop(w)
 
-
-
+def player_die():
+    global screen, score
+    for enemy in enemies:
+        if player.touches(enemy, -50, -50):
+            screen = 2
 
 
 def tick():
-    global score_display, score, has_ult, screen
+    global score_display, score, has_ult, screen, enemies, player, q_ability, ult_orb, frames, frames_enemy_spawn
 
     if screen == 0:
         camera.clear('black')
-        camera.draw(uvage.from_text(400, 100, 'Final Project Game', 70, 'white', True))
+        camera.draw(uvage.from_text(400, 100, 'Lone Survivor', 100, 'white', True))
+        camera.draw(uvage.from_text(400, 200, 'Click mouse to move', 30, 'white'))
+        camera.draw(uvage.from_text(400, 230, 'Press Q to shoot', 30, 'white'))
+        camera.draw(uvage.from_text(400, 260, 'Press R to use Ultimate; will exterminate all close enemies', 30, 'white'))
         camera.draw(uvage.from_color(400, 400, 'white', 120, 70))
         camera.draw(uvage.from_text(400, 400, 'Play', 70, 'black', True))
         if camera.mouseclick:
             point.center = camera.mouse
-        if point.x > 340 and point.x < 460 and point.y > 365 and point.y < 435:
+        if point.x >= 340 and point.x <= 460 and point.y >= 365 and point.y <= 435:
             screen = 1
 
         camera.display()
+
     if screen == 1:
         camera.clear('black')
-        score_display.text = 'Score: ' + str(score)
 
+        camera.draw(background)
         camera.draw(player)
         camera.draw(point)
 
@@ -310,13 +288,13 @@ def tick():
         grab_ult()
         use_ult()
 
+        enemy_kill()
         camera.draw(q_ability)
         player_move()
         spawn_enemy()
-        enemy_kill()
+
         fireball()
         chase()
-        camera.draw(score_display)
 
         if has_ult:
             camera.draw(ult_ready)
@@ -325,6 +303,32 @@ def tick():
 
         for i in enemies:
             camera.draw(i)
+
+        score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
+        camera.draw(score_display)
+        player_die()
+        camera.display()
+
+    if screen == 2:
+        camera.clear('black')
+        camera.draw(uvage.from_text(400, 250, 'Game over!', 100, 'white'))
+        camera.draw(uvage.from_text(400, 310, 'Your score was: ' + str(score),35, 'white'))
+        camera.draw(uvage.from_text(400, 560, 'Press space bar to return to home screen', 30, 'white'))
+
+        if uvage.is_pressing('space'):
+            screen = 0
+            score = 0
+            score_display = uvage.from_text(80,30, 'Score: ' + str(score), 50, 'red')
+            enemies = []
+            player.x = 200  # Reset player position
+            player.y = 200
+            q_ability.x = ability_off_loc.x  # Reset q_ability position
+            q_ability.y = ability_off_loc.y
+            ult_orb.x = -100  # Reset ult_orb position
+            ult_orb.y = -100
+            frames = 0
+            frames_enemy_spawn = 0
+            has_ult = False
         camera.display()
 
 
