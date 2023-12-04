@@ -123,6 +123,8 @@ def spawn_enemy():
     score_factor = score // 10
     spawn_rate = base_spawn_rate - (score_factor * 5)
 
+    if score_factor >= 8:
+        spawn_rate = 20
     if frames_enemy_spawn % spawn_rate == 0:
         enemy = uvage.from_image(-40, -40, 'enemy.png')
         enemy.scale_by(0.1)
